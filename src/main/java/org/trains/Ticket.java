@@ -92,12 +92,14 @@ public class Ticket {
 
     // methods
     public BigDecimal getPrice(){
-        BigDecimal price = pricePerKm.subtract(getDiscount());
+        BigDecimal price = pricePerKm.multiply(BigDecimal.valueOf(km));
+        BigDecimal discount = price.multiply(getDiscount());
+        BigDecimal finalPrice = price.subtract(discount);
         if (isFlexible){
             BigDecimal percentage = price.multiply(flexiblePrice);
-            return price.add(percentage);
+            return finalPrice.add(percentage);
         } else{
-            return price;
+            return finalPrice;
         }
     }
 
