@@ -1,21 +1,5 @@
 package org.trains;
 
-/*
-Creare una classe Biglietteria, che contiene il metodo main in cui:
-● chiedere all’utente di inserire il numero di km e l’età del passeggero
-● con quei dati provare a creare un nuovo Biglietto (gestire eventuali eccezioni con try-catch)
-● stampare a video il prezzo del biglietto calcolato
-BONUS:
-Creare una database “db_treni” e aggiungere una tabella “tratte”, che comprende le seguenti colonne:
-● id
-● partenza
-● arrivo
-● km
-Inserire nella tabella un insieme di dati, che rappresentano le tratte ferroviarie (ad es. partenza: Milano, arrivo: Roma, km: 574)
-Modificare la classe Biglietteria per fare in modo di connettersi al database e leggere l’elenco delle tratte ferroviarie dalla tabella.
-Invece di inserire manualmente il numero di km per creare un biglietto, permettere all’utente di scegliere una delle tratte e leggere il numero di km corrispondente.
- */
-
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.Scanner;
@@ -27,11 +11,14 @@ public class TicketOffice {
         String user = "root";
         String password = "Myroot23?";
 
+        String sql1 = "select * from routes";
+        String sql2 = "select * from routes where id = ?";
+
+
         // display routes
         System.out.println("Welcome to train ticket selection, available routes:");
         try(Connection conn = DriverManager.getConnection(url, user, password)){
-            String sql = "select * from routes";
-            try(PreparedStatement ps = conn.prepareStatement(sql)){
+            try(PreparedStatement ps = conn.prepareStatement(sql1)){
                 try(ResultSet rs = ps.executeQuery()){
                     while(rs.next()){
                         String id = rs.getString("id");
@@ -58,9 +45,8 @@ public class TicketOffice {
                     try (Connection conn = DriverManager.getConnection(url, user, password)) {
                         System.out.print("Choose a route: ");
                         int routeChoice = Integer.parseInt(scan.nextLine());
-                        String sql = "select * from routes where id = ?";
-                        PreparedStatement preparedStatement = conn.prepareStatement(sql);
-                        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                        PreparedStatement preparedStatement = conn.prepareStatement(sql2);
+                        try (PreparedStatement ps = conn.prepareStatement(sql2)) {
                             ps.setInt(1, routeChoice);
                             try (ResultSet rs = ps.executeQuery()) {
                                 while (rs.next()) {
@@ -75,11 +61,11 @@ public class TicketOffice {
                                     int age = Integer.parseInt(scan.nextLine());
                                     LocalDate date = LocalDate.now();
                                     System.out.println("Do you want a flexible duration ticket? (TRUE/FALSE)");
-                                    boolean isFlexible = scan.nextBoolean();
+                                    boolean isFlexible = Boolean.parseBoolean(scan.nextLine());
 
                                     try {
                                         Ticket ticket = new Ticket(km, age, date, isFlexible);
-                                        System.out.println("Your ticket: " + ticket + "€" + String.format("%.2f", ticket.getPrice()) + ";");
+                                        System.out.println("Your ticket: " + ticket);
                                     } catch (RuntimeException e) {
                                         System.out.println("Invalid input.");
                                     }
@@ -97,7 +83,6 @@ public class TicketOffice {
                 }
                 default -> System.out.println("Invalid choice.");
             }
-            scan.nextLine();
         }
         scan.close();
     }
